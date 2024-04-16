@@ -5,6 +5,10 @@ const express = require('express');
 //création de l'application express
 const app = express();
 
+//middleware qui permet de parser les requêtes envoyées par le client, et d'extraire l'objet JSON du body de la requête
+app.use(express.json());
+
+//app.use() = intercepte TOUTES les requettes envoyées à notre serveur
 //middleware = fonction express qui reçoit la requête req et la réponse res, qui les geres, et qui eventuellement passe la main au middleware suivant next, pour continuer l'execution du serveur en utilisant la méthode next() en fin de fonction  
 
 //middleware general qui ne concerne pas de route spécifique
@@ -20,8 +24,19 @@ app.use((req, res, next) =>
     next();
   });
 
+
+  app.post('/api/stuff', (req, res, next) =>
+{
+    //grace a app.use(express.json()); => req.body contient l'objet JSON envoyé par le client
+    console.log(req.body);
+    //retourner une réponse au client pour éviter que la requête ne reste en attente et finisse par expirer, ce qui pourrait entraîner une erreur côté client
+    //201 = création d'une ressource en BDD
+    res.status(201).json({ message: 'Objet créé !'});
+});
+
 //app.use attribut un middleware à une route spécifique
-app.use('/api/stuff', (req, res, next) => 
+//app.get permet de répondre uniquement aux requêtes GET
+app.get('/api/stuff', (req, res, next) => 
 {
     const stuff = [
       {
