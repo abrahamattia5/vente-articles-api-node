@@ -8,6 +8,14 @@ const app = express();
 //middleware qui permet de parser les requêtes envoyées par le client, et d'extraire l'objet JSON du body de la requête
 app.use(express.json());
 
+//import de mongoose pour se connecter à la base de données
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb+srv://user:user@cluster0.dz32xny.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+  .then(() => console.log('Connexion à MongoDB réussie !'))
+  .catch(() => console.log('Connexion à MongoDB échouée !'));
+
+
 //app.use() = intercepte TOUTES les requettes envoyées à notre serveur
 //middleware = fonction express qui reçoit la requête req et la réponse res, qui les geres, et qui eventuellement passe la main au middleware suivant next, pour continuer l'execution du serveur en utilisant la méthode next() en fin de fonction  
 
