@@ -5,6 +5,9 @@ const express = require('express');
 //création de l'application express
 const app = express();
 
+//import du modèle Thing pour manipuler des articles
+const Thing = require('./models/Thing');
+
 //middleware qui permet de parser les requêtes envoyées par le client, et d'extraire l'objet JSON du body de la requête
 app.use(express.json());
 
@@ -35,11 +38,29 @@ app.use((req, res, next) =>
 
   app.post('/api/stuff', (req, res, next) =>
 {
-    //grace a app.use(express.json()); => req.body contient l'objet JSON envoyé par le client
-    console.log(req.body);
-    //retourner une réponse au client pour éviter que la requête ne reste en attente et finisse par expirer, ce qui pourrait entraîner une erreur côté client
-    //201 = création d'une ressource en BDD
-    res.status(201).json({ message: 'Objet créé !'});
+    //les informations qui arrivent de la requête POST contiennent les info de l'objet à créer
+    //on extrait l'objet JSON dans un objet Thing de la requête dans une constante thing pour le manipuler ici et pouvoir l'enregistrer en BDD
+    /*
+    //pour recuperer les info on peut faire de cette manière : 
+
+    const thing = new Thing(
+      {
+        title: req.body.title,
+        description: req.body.description,
+        imageUrl: req.body.imageUrl,
+        price: req.body.price,
+        userId: req.body.userId,
+      });
+    */
+    //ou bien utiliser l'opérateur spread pour copier les champs de l'objet req.body dans un nouvel objet thing et automatiquement recuperer les champs de l'objet req.body dans l'objet thing
+    //on supprime l'id envoyé par le client car c'est la base de données qui le génère automatiquement
+    delete req.body._id;
+    const thing = new Thing({ ...req.body });
+    //enregistrer l'objet dans la base de données et renvoyer une réponse de réussite en cas de succès, ou une erreur en cas d'échec
+    thing.save()
+      //répondre avec un statut 201 en cas de succès et un message de réussite pour eviter les erreurs client si on a pas de réponse
+      .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
+      .catch(error => res.status(400).json({ error }));
 });
 
 //app.use attribut un middleware à une route spécifique
