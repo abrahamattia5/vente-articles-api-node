@@ -4,7 +4,7 @@
 //import de mongoose
 const mongoose = require('mongoose');
 
-//création d'un schema de données mongoose (avec .Schema() ) qui contient un objet avec les champs souhaités pour chaque objet de la base de données
+//création d'un schema de données mongoose (avec mongoose.Schema({objet}) ) qui contient un objet avec les champs qu'on veut sauvegarder en BDD
 //La méthode  Schema  de Mongoose vous permet de créer un schéma de données pour votre base de données MongoDB.
 //l'id est automatiquement creer par mongoose 
 const thingSchema = mongoose.Schema({

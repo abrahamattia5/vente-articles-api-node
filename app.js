@@ -13,7 +13,6 @@ app.use(express.json());
 
 //import de mongoose pour se connecter à la base de données
 const mongoose = require('mongoose');
-
 mongoose.connect('mongodb+srv://user:user@cluster0.dz32xny.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
@@ -26,7 +25,7 @@ mongoose.connect('mongodb+srv://user:user@cluster0.dz32xny.mongodb.net/?retryWri
 //middleware pour eviter les erreurs CORS (Cross Origin Resource Sharing)
 app.use((req, res, next) => 
 {
-    //autoriser l'accès à notre API depuis n'importe quelle origine ( '*' )
+    //autoriser l'accès à notre API depuis n'importe quelle origine ( '*' ) -> pour eviter les erreurs CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     //autoriser l'utilisation de certains en tete (Origin , X-Requested-With , etc.)
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -36,13 +35,12 @@ app.use((req, res, next) =>
   });
 
 
-  app.post('/api/stuff', (req, res, next) =>
+app.post('/api/stuff', (req, res, next) =>
 {
     //les informations qui arrivent de la requête POST contiennent les info de l'objet à créer
     //on extrait l'objet JSON dans un objet Thing de la requête dans une constante thing pour le manipuler ici et pouvoir l'enregistrer en BDD
     /*
     //pour recuperer les info on peut faire de cette manière : 
-
     const thing = new Thing(
       {
         title: req.body.title,
@@ -67,27 +65,12 @@ app.use((req, res, next) =>
 //app.get permet de répondre uniquement aux requêtes GET
 app.get('/api/stuff', (req, res, next) => 
 {
-    const stuff = [
-      {
-        _id: 'oeihfzeoi',
-        title: 'Mon premier objet',
-        description: 'Les infos de mon premier objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 4900,
-        userId: 'qsomihvqios',
-      },
-      {
-        _id: 'oeihfzeomoihi',
-        title: 'Mon deuxième objet',
-        description: 'Les infos de mon deuxième objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 2900,
-        userId: 'qsomihvqios',
-      },
-    ];
-    //attribuer un statut de réponse 200 (succès) à la réponse et envoyer le tableau contenant les objets au format JSON en tant que réponse
-    res.status(200).json(stuff);
-  });
+    //récupérer tous les objets de la base de données
+    Thing.find()
+      .then(things => res.status(200).json(things))
+      .catch(error => res.status(400).json({ error }));
+      
+});
   
   
 //exporter l'application express pour y accéder depuis les autres fichiers (ex notre serveur node)
