@@ -71,7 +71,16 @@ app.get('/api/stuff', (req, res, next) =>
       .catch(error => res.status(400).json({ error }));
       
 });
+
+// recuperer un seul objet de la base de données en fonction de son id
+app.get('/api/stuff/:id', (req, res, next) => 
+{
+  //_id: req.params.id -> l'_id de de l'element a chercher en BDD et egale à l'id passé en paramètre dans l'url : req.params.id
+  Thing.findOne({ _id: req.params.id })
+    .then(thing => res.status(200).json(thing))
+    .catch(error => res.status(404).json({ error }));
+});
   
-  
+// image d'exemple : https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg
 //exporter l'application express pour y accéder depuis les autres fichiers (ex notre serveur node)
 module.exports = app;
