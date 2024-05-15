@@ -80,6 +80,14 @@ app.get('/api/stuff/:id', (req, res, next) =>
     .then(thing => res.status(200).json(thing))
     .catch(error => res.status(404).json({ error }));
 });
+
+app.put('/api/stuff/:id', (req, res, next) => 
+{
+  // {_iD = id du param } , { spread operator pour recuperer les champs de l'objet req.body : qui correspond a l'id du parametre de la requete }
+  Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
+    .then(() => res.status(200).json({ message: 'Objet modifié !'}))
+    .catch(error => res.status(400).json({ error }));
+});
   
 // image d'exemple : https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg
 //exporter l'application express pour y accéder depuis les autres fichiers (ex notre serveur node)
