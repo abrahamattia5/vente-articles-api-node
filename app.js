@@ -5,8 +5,8 @@ const express = require('express');
 //création de l'application express
 const app = express();
 
-//import du modèle Thing pour manipuler des articles
-const Thing = require('./models/Thing');
+//import du routeur des stuff contenue dans le dossier routes pour router l'application express
+const stuffRoutes = require('./routes/stuff');
 
 //middleware qui permet de parser les requêtes envoyées par le client, et d'extraire l'objet JSON du body de la requête
 app.use(express.json());
@@ -34,67 +34,8 @@ app.use((req, res, next) =>
     next();
   });
 
-
-app.post('/api/stuff', (req, res, next) =>
-{
-    //les informations qui arrivent de la requête POST contiennent les info de l'objet à créer
-    //on extrait l'objet JSON dans un objet Thing de la requête dans une constante thing pour le manipuler ici et pouvoir l'enregistrer en BDD
-    /*
-    //pour recuperer les info on peut faire de cette manière : 
-    const thing = new Thing(
-      {
-        title: req.body.title,
-        description: req.body.description,
-        imageUrl: req.body.imageUrl,
-        price: req.body.price,
-        userId: req.body.userId,
-      });
-    */
-    //ou bien utiliser l'opérateur spread pour copier les champs de l'objet req.body dans un nouvel objet thing et automatiquement recuperer les champs de l'objet req.body dans l'objet thing
-    //on supprime l'id envoyé par le client car c'est la base de données qui le génère automatiquement
-    delete req.body._id;
-    const thing = new Thing({ ...req.body });
-    //enregistrer l'objet dans la base de données et renvoyer une réponse de réussite en cas de succès, ou une erreur en cas d'échec
-    thing.save()
-      //répondre avec un statut 201 en cas de succès et un message de réussite pour eviter les erreurs client si on a pas de réponse
-      .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
-      .catch(error => res.status(400).json({ error }));
-});
-
-//app.use attribut un middleware à une route spécifique
-//app.get permet de répondre uniquement aux requêtes GET
-app.get('/api/stuff', (req, res, next) => 
-{
-    //récupérer tous les objets de la base de données
-    Thing.find()
-      .then(things => res.status(200).json(things))
-      .catch(error => res.status(400).json({ error }));
-      
-});
-
-// recuperer un seul objet de la base de données en fonction de son id
-app.get('/api/stuff/:id', (req, res, next) => 
-{
-  //_id: req.params.id -> l'_id de de l'element a chercher en BDD et egale à l'id passé en paramètre dans l'url : req.params.id
-  Thing.findOne({ _id: req.params.id })
-    .then(thing => res.status(200).json(thing))
-    .catch(error => res.status(404).json({ error }));
-});
-
-app.put('/api/stuff/:id', (req, res, next) => 
-{
-  // {_iD = id du param } , { spread operator pour recuperer les champs de l'objet req.body : qui correspond a l'id du parametre de la requete }
-  Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Objet modifié !'}))
-    .catch(error => res.status(400).json({ error }));
-});
-
-app.delete('/api/stuff/:id', (req, res, next) => 
-{
-  Thing.deleteOne({ _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
-    .catch(error => res.status(400).json({ error }));
-});
+//pour la route /api/stuff, on utilise le routeur exposé par stuffRoutes qui contient toutes la logique des routes pour les articles et ne polue pas notre fichier app.js
+app.use('/api/stuff', stuffRoutes);
   
 // image d'exemple : https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg
 //exporter l'application express pour y accéder depuis les autres fichiers (ex notre serveur node)
