@@ -7,6 +7,8 @@ const app = express();
 
 //import du routeur des stuff contenue dans le dossier routes pour router l'application express
 const stuffRoutes = require('./routes/stuff');
+//import du routeur des user
+const userRoutes = require('./routes/user');
 
 //middleware qui permet de parser les requêtes envoyées par le client, et d'extraire l'objet JSON du body de la requête
 app.use(express.json());
@@ -36,6 +38,9 @@ app.use((req, res, next) =>
 
 //pour la route /api/stuff, on utilise le routeur exposé par stuffRoutes qui contient toutes la logique des routes pour les articles et ne polue pas notre fichier app.js
 app.use('/api/stuff', stuffRoutes);
+//utilisation des routes pour les utilisateurs
+//pour la route /api/auth, on utilise le routeur exposé par userRoutes qui contient toutes la logique des routes pour les utilisateurs et ne polue pas notre fichier app.js
+app.use('/api/auth', userRoutes);
   
 // image d'exemple : https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg
 //exporter l'application express pour y accéder depuis les autres fichiers (ex notre serveur node)
