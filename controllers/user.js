@@ -5,6 +5,9 @@ const bcrypt = require('bcrypt');
 //model User pour manipuler les utilisateurs dans la BDD
 const User = require('../models/User');
 
+//npm install --save jsonwebtoken -> import de jsonwebtoken pour attribuer un token à un utilisateur lors de sa connexion
+const jwt = require('jsonwebtoken');
+
 exports.signup = (req, res, next) => 
 {
     //on commence par hasher le mot de passe pour le sécuriser : on le recupère dans le corps de la requête et on utilise la méthode hash de bcrypt pour le hasher
@@ -52,7 +55,12 @@ exports.login = (req, res, next) =>
                     res.status(200).json(
                     {
                         userId: user._id,
-                        token: 'TOKEN'
+                        token: jwt.sign
+                        (
+                            { userId: user._id },
+                            'RANDOM_TOKEN_SECRET',
+                            { expiresIn: '24h' }
+                        )
                     });
                 })
                 //si la fonction compare renvoie une erreur
