@@ -22,28 +22,23 @@ exports.getOneThing = (req, res, next) =>
 
 exports.createThing = (req, res, next) =>
 {
-    //les informations qui arrivent de la requête POST contiennent les info de l'objet à créer
-    //on extrait l'objet JSON dans un objet Thing de la requête dans une constante thing pour le manipuler ici et pouvoir l'enregistrer en BDD
-    /*
-    //pour recuperer les info on peut faire de cette manière : 
+    //l'objet recu est du json mais sous format string : il faut le parser en JSON
+    const thingObject = JSON.parse(req.body.thing);
+    //on ne fait pas confiance a l'utilisateur : on supprime l'id de l'objet qui sera generer par la BDD et le userId de l'objet recu de sa part.
+    delete thingObject._id;
+    delete thingObject._userId;
     const thing = new Thing(
     {
-        title: req.body.title,
-        description: req.body.description,
-        imageUrl: req.body.imageUrl,
-        price: req.body.price,
-        userId: req.body.userId,
+        ...thingObject,
+        //on recupere l'userId du token pour l'associer a l'objet (pour eviter uune faille de securitée qui permettrait d'accéder a des données d'autres utilisateurs en modifiant l'userId)
+        userId: req.auth.userId,
+        //multer nous fournit seulement le nom de fichier : on construit l'url (la route) complete de l'image en utilisant le protocol (http ou https) et le nom de l'hote (localhost:3000) , le dossier images qui contient les images et le nom du fichier donné par multer : req.file.filename
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     });
-    */
-    //ou bien utiliser l'opérateur spread pour copier les champs de l'objet req.body dans un nouvel objet thing et automatiquement recuperer les champs de l'objet req.body dans l'objet thing
-    //on supprime l'id envoyé par le client car c'est la base de données qui le génère automatiquement
-    delete req.body._id;
-    const thing = new Thing({ ...req.body });
-    //enregistrer l'objet dans la base de données et renvoyer une réponse de réussite en cas de succès, ou une erreur en cas d'échec
+  
     thing.save()
-    //répondre avec un statut 201 en cas de succès et un message de réussite pour eviter les erreurs client si on a pas de réponse
-    .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
-    .catch(error => res.status(400).json({ error }));
+        .then(() => { res.status(201).json({message: 'Objet enregistré !'})})
+        .catch(error => { res.status(400).json( { error })})
 };
 
 exports.modifyThing = (req, res, next) => 
