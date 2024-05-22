@@ -41,13 +41,43 @@ exports.createThing = (req, res, next) =>
         .catch(error => { res.status(400).json( { error })})
 };
 
+
 exports.modifyThing = (req, res, next) => 
 {
-    // {_iD = id du param } , { spread operator pour recuperer les champs de l'objet req.body : qui correspond a l'id du parametre de la requete }
-    Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Objet modifié !'}))
-    .catch(error => res.status(400).json({ error }));
+    //on verifie avec un ternaire si il y a un champ file et donc un fichier dans la requete : si oui on parse en JSON et on construit l'objet avec l'url de l'image, si non on construit l'objet avec les données recu qui sont deja en JSON
+    const thingObject = req.file ? 
+    {
+        //on parse l'objet thing qui est en string en objet JSON
+        ...JSON.parse(req.body.thing),
+        //on construit l'url (la route) complete de l'image en utilisant le protocol (http ou https) et le nom de l'hote (localhost:3000) , le dossier images qui contient les images et le nom du fichier donné par multer : req.file.filename
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    } 
+    : 
+    //si il n'y a pas de fichier dans la requete on construit l'objet avec les données recu qui sont deja en JSON
+    { ...req.body };
+  
+    //Pour éviter que quelqu'un crée un objet avec son userId puis le modifie pour le passer à un autre utilisateur, on vérifie que l'objet a bien été créé par l'utilisateur qui le modifie
+    delete thingObject._userId;
+    //on cherche l'objet dans la BDD (grace a son id) pour verifier si c'est l'utilisateur qui l'a créé qui le modifie
+    Thing.findOne({_id: req.params.id})
+        .then((thing) => 
+        {
+            //on verifie si l'userId de l'objet en BDD est le meme que celui de l'utilisateur qui cherche a le modifier. on prend l'userId du token de cette requette (req.auth.userId) et on le compare a l'userId de l'objet en BDD
+            if (thing.userId != req.auth.userId) 
+            {
+                res.status(401).json({ message : 'Not authorized'});
+            } 
+            else 
+            {
+                //mettre a jour l'objet dans la BDD avec l'objet modifié {quel objet on modifie} {avec quoi on le modifie,}
+                Thing.updateOne({ _id: req.params.id}, { ...thingObject, _id: req.params.id})
+                    .then(() => res.status(200).json({message : 'Objet modifié!'}))
+                    .catch(error => res.status(401).json({ error }));
+            }
+        })
+        .catch((error) => { res.status(400).json({ error }); });
 };
+
 
 exports.deleteThing = (req, res, next) => 
 {

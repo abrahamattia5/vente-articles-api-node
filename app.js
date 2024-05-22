@@ -44,6 +44,7 @@ app.use('/api/stuff', stuffRoutes);
 //pour la route /api/auth, on utilise le routeur exposé par userRoutes qui contient toutes la logique des routes pour les utilisateurs et ne polue pas notre fichier app.js
 app.use('/api/auth', userRoutes);
 //pour accéder au chemin de notre système de fichier et accéder aux images dans le dossier images pour afficher les images des articles forunis par les utilisateurs stockées dans le dossier images
+//express.static() configure le serveur pour renvoyer des ficiers statiques grace a cette route
 app.use('/images', express.static(path.join(__dirname, 'images')));
   
 // image d'exemple : https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg

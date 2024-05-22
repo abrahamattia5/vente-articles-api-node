@@ -5,7 +5,7 @@ const express = require('express');
 //import du middleware pour sécuriser les routes et vérifier l'authentification
 const auth = require('../middleware/auth');
 
-//import du middleware de configuration de multer pour la gestion des images entrantes
+//import du middleware de configuration de multer pour la gestion des images entrantes 
 const multer = require('../middleware/multer-config');
 
 //creation d'un routeur express : ce routeur sera exporté et ajouté à notre application express dans app.js
@@ -19,7 +19,7 @@ const stuffCtrl = require('../controllers/stuff');
 router.get('/',  auth ,stuffCtrl.getAllThings );
 router.get('/:id', auth , stuffCtrl.getOneThing );
 router.post('/', auth , multer, stuffCtrl.createThing );
-router.put('/:id', auth , stuffCtrl.modifyThing );
+router.put('/:id', auth , multer, stuffCtrl.modifyThing );
 router.delete('/:id', auth , stuffCtrl.deleteThing );
 
 module.exports = router;
