@@ -71,6 +71,15 @@ exports.modifyThing = (req, res, next) =>
             } 
             else 
             {
+                //chercher si il y a une nouvelle image dans la requete pour supprimer l'ancienne image et eviter de saturer le serveur
+                if (req.file) 
+                {
+                    //recuperer le nom de l'image dans l'url de l'image ( [0]=/images/ [1]=nom du fichier )
+                    const filename = thing.imageUrl.split('/images/')[1];
+                    //supprimer l'ancienne image
+                    fs.unlink(`images/${filename}`, () => {});
+                    
+                }
                 //mettre a jour l'objet dans la BDD avec l'objet modifié {quel objet on modifie} {avec quoi on le modifie,}
                 Thing.updateOne({ _id: req.params.id}, { ...thingObject, _id: req.params.id})
                     .then(() => res.status(200).json({message : 'Objet modifié!'}))
