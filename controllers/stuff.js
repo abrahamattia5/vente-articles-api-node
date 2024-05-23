@@ -2,6 +2,8 @@
 
 //importer thing pour manipuler des articles
 const Thing = require('../models/Thing');
+//FileSystem pour accéder au système de fichier et supprimer des fichiers
+const fs = require('fs');
 
 exports.getAllThings = (req, res, next) => 
 {
@@ -81,8 +83,28 @@ exports.modifyThing = (req, res, next) =>
 
 exports.deleteThing = (req, res, next) => 
 {
-    Thing.deleteOne({ _id: req.params.id })
-        .then(() => res.status(200).json({ message: 'Objet supprimé !'}))
-        .catch(error => res.status(400).json({ error }));
+    //par securité on recupere l'objet dasn la BDD pour verifier les droits de l'utilisateur qui cherche a le supprimer grace a l'user ID du token et du possesseur de l'objet en base 
+    Thing.findOne({ _id: req.params.id})
+    .then(thing => {
+        if (thing.userId != req.auth.userId) 
+        {
+            res.status(401).json({message: 'Not authorized'});
+        }
+        else 
+        {
+            //si c'est le bon utilisateur , avant de supprimer l'objet on recupere le nom de l'image dans l'url de l'image ( [0]=/images/ [1]=nom du fichier )
+            const filename = thing.imageUrl.split('/images/')[1];
+            //fs.unlink() permet de supprimer un fichier grace a son chemin. une fonction de callback s'execute apres la suppression du fichier et supprime l'objet dans la BDD
+            fs.unlink(`images/${filename}`, () => 
+            {
+                Thing.deleteOne({_id: req.params.id})
+                    .then(() => { res.status(200).json({message: 'Objet supprimé !'})})
+                    .catch(error => res.status(401).json({ error }));
+            });
+        }
+    })
+    .catch( error => {
+        res.status(500).json({ error });
+    });
 };
 
